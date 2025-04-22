@@ -13,8 +13,8 @@ resource "google_compute_instance" "mqtt_broker" {
   }
 
   network_interface {
-    network    = var.vpc_id
-    subnetwork = var.subnet_id
+    network    = module.vpc.vpc_id
+    subnetwork = module.vpc.private_subnet_03_id
     
     access_config {
       // Ephemeral public IP

@@ -34,7 +34,7 @@ variable "command_layer_node_count" {
 variable "command_layer_machine_type" {
   description = "Machine type for command layer nodes"
   type        = string
-  default     = "e2-standard-4"
+  default     = "e2-medium"
 }
 
 variable "command_layer_min_node_count" {
@@ -46,7 +46,7 @@ variable "command_layer_min_node_count" {
 variable "command_layer_max_node_count" {
   description = "Maximum number of nodes in the command layer node pool"
   type        = number
-  default     = 5
+  default     = 2
 }
 
 # MDM Layer
@@ -59,7 +59,7 @@ variable "mdm_layer_node_count" {
 variable "mdm_layer_machine_type" {
   description = "Machine type for MDM layer nodes"
   type        = string
-  default     = "e2-standard-4"
+  default     = "e2-medium"
 }
 
 variable "mdm_layer_min_node_count" {
@@ -71,7 +71,7 @@ variable "mdm_layer_min_node_count" {
 variable "mdm_layer_max_node_count" {
   description = "Maximum number of nodes in the MDM layer node pool"
   type        = number
-  default     = 5
+  default     = 2
 }
 
 # Raw Layer
@@ -84,7 +84,7 @@ variable "raw_layer_node_count" {
 variable "raw_layer_machine_type" {
   description = "Machine type for raw layer nodes"
   type        = string
-  default     = "e2-standard-8"
+  default     = "e2-medium"
 }
 
 variable "raw_layer_min_node_count" {
@@ -109,7 +109,7 @@ variable "meter_layer_node_count" {
 variable "meter_layer_machine_type" {
   description = "Machine type for meter layer nodes"
   type        = string
-  default     = "e2-standard-4"
+  default     = "e2-medium"
 }
 
 variable "meter_layer_min_node_count" {
@@ -134,7 +134,7 @@ variable "network_layer_node_count" {
 variable "network_layer_machine_type" {
   description = "Machine type for network layer nodes"
   type        = string
-  default     = "e2-standard-4"
+  default     = "e2-medium"
 }
 
 variable "network_layer_min_node_count" {

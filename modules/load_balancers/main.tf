@@ -17,7 +17,7 @@ resource "google_compute_region_backend_service" "network_lb_backend" {
   project               = var.project_id
   protocol              = "TCP"
   load_balancing_scheme = "EXTERNAL"
-  health_checks         = [google_compute_health_check.network_lb_health_check.id]
+  health_checks         = [google_compute_region_health_check.network_lb_health_check.id]
   session_affinity      = "NONE"
   
   dynamic "backend" {
@@ -30,12 +30,15 @@ resource "google_compute_region_backend_service" "network_lb_backend" {
   }
 }
 
-resource "google_compute_health_check" "network_lb_health_check" {
+resource "google_compute_region_health_check" "network_lb_health_check" {
+  
   name               = "network-lb-health-check"
+  region              = var.region
   project            = var.project_id
   check_interval_sec = 5
   timeout_sec        = 5
-  
+  healthy_threshold   = 4
+  unhealthy_threshold = 5  
   tcp_health_check {
     port = "80"
   }

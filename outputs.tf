@@ -38,7 +38,7 @@ output "kubernetes_endpoint" {
   value       = module.kubernetes.cluster_endpoint
   sensitive   = true
 }
-
+/*
 output "rabbitmq_connection_string" {
   description = "Connection string for RabbitMQ"
   value       = module.rabbitmq.connection_string

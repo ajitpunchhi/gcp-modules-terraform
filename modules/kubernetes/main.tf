@@ -2,6 +2,7 @@ resource "google_container_cluster" "primary" {
   name     = "kubernetes-cluster"
   location = var.region
   project  = var.project_id
+  deletion_protection = "false"
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -14,7 +15,8 @@ resource "google_container_cluster" "primary" {
 
   # Enable IP aliasing
   ip_allocation_policy {
-    cluster_ipv4_cidr_block  = var.master_ipv4_cidr_block
+    cluster_secondary_range_name  = "k8s-pods"
+    services_secondary_range_name = "k8s-services"
   }
 
   # Enable private cluster

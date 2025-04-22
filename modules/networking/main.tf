@@ -2,7 +2,6 @@ resource "google_compute_network" "vpc" {
   name                    = "main-vpc"
   auto_create_subnetworks = false
   project                 = var.project_id
-  mtu                     = var.mtu
 }
 
 # Public subnet
@@ -16,11 +15,21 @@ resource "google_compute_subnetwork" "public_subnet" {
 
 # Private subnet
 resource "google_compute_subnetwork" "private_subnet_01" {
-  name          = "private-subnet-01"
+  name          = "private-subnet"
   ip_cidr_range = var.private_subnet_01_cidr
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+  
+  secondary_ip_range {
+    range_name    = "k8s-pods"
+    ip_cidr_range = var.k8s_pods_cidr
+  }
+  
+  secondary_ip_range {
+    range_name    = "k8s-services"
+    ip_cidr_range = var.k8s_services_cidr
+  }
 }
 
 resource "google_compute_subnetwork" "private_subnet_02" {

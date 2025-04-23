@@ -1,3 +1,12 @@
+# Load balancers (Network and Application)
+# This module sets up network and application load balancers for traffic management.
+# It is responsible for distributing incoming traffic across multiple instances, ensuring high availability and reliability.
+# The load balancers are essential for managing traffic to the application and providing fault tolerance.
+# The network load balancer handles TCP/UDP traffic, while the application load balancer manages HTTP/HTTPS traffic.
+# The load balancers are configured with health checks to ensure that traffic is only sent to healthy instances.
+# The network load balancer is designed for low-latency, high-throughput applications, while the application load balancer provides advanced routing capabilities.
+
+
 # Network Load Balancer
 resource "google_compute_forwarding_rule" "network_lb" {
   name                  = "network-lb"

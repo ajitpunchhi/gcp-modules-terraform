@@ -1,3 +1,8 @@
+# File: compute.tf
+# Compute instances for various layers
+# This module deploys virtual machine instances for different layers of the application.
+# It is responsible for creating the compute resources needed to run the application.
+
 resource "google_compute_instance" "vm_instance" {
   name         = var.instance_name
   project = var.project

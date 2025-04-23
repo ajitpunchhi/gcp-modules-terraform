@@ -1,3 +1,9 @@
+# File: outputs.tf
+# This file defines the outputs of the Terraform configuration.
+# Outputs are useful for retrieving information about the resources created by the configuration.
+# They can be used to display important information after the deployment is complete.
+# Outputs can also be referenced in other Terraform configurations or modules.
+
 output "vpc_id" {
   description = "ID of the created VPC"
   value       = module.vpc.vpc_id

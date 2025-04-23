@@ -1,3 +1,9 @@
+# VPC Network 
+# This module creates a Virtual Private Cloud (VPC) network with subnets.
+# It is responsible for setting up the network infrastructure for the project.
+# The VPC network is a fundamental component of the GCP infrastructure, providing isolation and security for resources.
+# The VPC network is created with multiple subnets, each serving different purposes (e.g., private, public).
+
 resource "google_compute_network" "vpc" {
   name                    = "main-vpc"
   auto_create_subnetworks = false

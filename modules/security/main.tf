@@ -1,3 +1,10 @@
+# This module configures security settings, including service accounts and IAM roles.
+# It is responsible for managing access control and permissions for resources within the GCP project.
+# The security module is essential for ensuring that only authorized users and services can access resources.
+# The security module is created with a service account for the application and a Cloud Armor policy for protecting the application from DDoS attacks.
+# The service account is granted the necessary IAM roles to access resources within the project.
+# The Cloud Armor policy is configured with rules to allow or deny traffic based on specified criteria.
+
 # IAM Service Account
 resource "google_service_account" "service_account" {
   account_id   = var.service_account_name

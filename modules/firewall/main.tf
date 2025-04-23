@@ -1,3 +1,8 @@
+# Cloud Firewall rules
+# This module sets up firewall rules for the VPC network.
+# It is responsible for configuring the security settings for the network, allowing or denying traffic based on specified rules.
+# The firewall rules are essential for controlling access to resources within the VPC network.
+
 # Allow SSH access to VMs in the public subnet
 resource "google_compute_firewall" "allow_ssh" {
   name    = "allow-ssh"

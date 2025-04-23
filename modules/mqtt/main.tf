@@ -1,3 +1,9 @@
+# This module deploys an MQTT broker for messaging.
+# It is responsible for managing message communication between different components of the application.
+# The MQTT broker is essential for enabling real-time messaging and communication between devices and services.
+# The MQTT broker is created with a service account and is configured to allow anonymous access.
+# The MQTT broker is deployed on a Compute Engine instance with a startup script to install and configure the broker software.
+
 # Create a Compute Engine instance for the MQTT broker
 resource "google_compute_instance" "mqtt_broker" {
   name         = "mqtt-broker"

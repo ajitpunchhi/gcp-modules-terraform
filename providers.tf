@@ -1,3 +1,4 @@
+
 /*terraform {
   required_providers {
     google = {
@@ -38,6 +39,3 @@ provider "google" {
 provider "google-beta" {
   credentials = file("./credentials.json")
 }
-
-
-

@@ -1,3 +1,13 @@
+# Kubernetes Services
+# This module deploys a Kubernetes cluster for container orchestration.
+# It is responsible for managing containerized applications, providing features such as scaling, load balancing, and service discovery.
+# The Kubernetes cluster is a key component for running microservices and other containerized workloads.
+# The Kubernetes cluster is created with a private master node and multiple node pools for different application layers.
+# The cluster is configured with IP aliasing and workload identity for better security and management.
+# The Kubernetes cluster is also integrated with Google Cloud's monitoring and logging services for better observability.
+# The Kubernetes cluster is created with a private master node and multiple node pools for different application layers.
+# The cluster is configured with IP aliasing and workload identity for better security and management.
+
 resource "google_container_cluster" "primary" {
   name     = "kubernetes-cluster"
   location = var.region

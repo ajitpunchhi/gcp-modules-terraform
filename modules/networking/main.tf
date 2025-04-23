@@ -28,15 +28,6 @@ resource "google_compute_subnetwork" "private_subnet_01" {
   network       = google_compute_network.vpc.id
   project       = var.project_id
   
-  secondary_ip_range {
-    range_name    = "k8s-pods"
-    ip_cidr_range = var.k8s_pods_cidr
-  }
-  
-  secondary_ip_range {
-    range_name    = "k8s-services"
-    ip_cidr_range = var.k8s_services_cidr
-  }
   log_config {
     aggregation_interval = "INTERVAL_10_MIN"
     flow_sampling        = 0.5
@@ -82,6 +73,16 @@ resource "google_compute_subnetwork" "private_subnet_04" {
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+
+   secondary_ip_range {
+    range_name    = "k8s-pods"
+    ip_cidr_range = var.k8s_pods_cidr
+  }
+  
+  secondary_ip_range {
+    range_name    = "k8s-services"
+    ip_cidr_range = var.k8s_services_cidr
+  }
   log_config {
     aggregation_interval = "INTERVAL_10_MIN"
     flow_sampling        = 0.5

@@ -43,13 +43,13 @@ variable "private_subnet_05_cidr" {
 variable "k8s_pods_cidr" {
   description = "CIDR block for Kubernetes pods"
   type        = string
-  default     = "10.1.0.0/16"
+  default     = "20.1.0.0/16"
 }
 
 variable "k8s_services_cidr" {
   description = "CIDR block for Kubernetes services"
   type        = string
-  default     = "10.2.0.0/16"
+  default     = "20.2.0.0/16"
 }
 variable "mtu" {
   description = "MTU size for the VPC"

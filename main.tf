@@ -34,7 +34,7 @@ module "firewall" {
   depends_on = [module.vpc]
 }
 
-/*# Kubernetes Services
+# Kubernetes Services
 # This module deploys a Kubernetes cluster for container orchestration.
 
 module "kubernetes" {
@@ -42,10 +42,10 @@ module "kubernetes" {
   project_id   = var.project_id
   region       = var.region
     vpc_id       = module.vpc.vpc_id
-  subnet_id    = module.vpc.private_subnet_01_id
+  subnet_id    = module.vpc.private_subnet_04_id
   depends_on   = [module.vpc]
 }
-*/
+
 
 # Security
 # This module configures security settings, including service accounts and IAM roles.
@@ -110,6 +110,7 @@ module "load_balancers" {
   subnet_id             = module.vpc.private_subnet_03_id
   network_lb_subnet_id  = module.vpc.private_subnet_02_id
   application_lb_subnet_id = module.vpc.private_subnet_02_id
+  
   
 }
 

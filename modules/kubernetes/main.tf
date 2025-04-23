@@ -1,263 +1,129 @@
-# Kubernetes Services
-# This module deploys a Kubernetes cluster for container orchestration.
-# It is responsible for managing containerized applications, providing features such as scaling, load balancing, and service discovery.
-# The Kubernetes cluster is a key component for running microservices and other containerized workloads.
-# The Kubernetes cluster is created with a private master node and multiple node pools for different application layers.
-# The cluster is configured with IP aliasing and workload identity for better security and management.
-# The Kubernetes cluster is also integrated with Google Cloud's monitoring and logging services for better observability.
-# The Kubernetes cluster is created with a private master node and multiple node pools for different application layers.
-# The cluster is configured with IP aliasing and workload identity for better security and management.
-
 resource "google_container_cluster" "primary" {
-  name     = "kubernetes-cluster"
-  location = var.region
-  project  = var.project_id
-  deletion_protection = "false"
-
-  # We can't create a cluster with no node pool defined, but we want to only use
-  # separately managed node pools. So we create the smallest possible default
-  # node pool and immediately delete it.
-  remove_default_node_pool = true
+  name                     = var.cluster_name
+  project = var.project_id
+  location                 = var.location
+  remove_default_node_pool = "true"
   initial_node_count       = 1
+  network                  = var.vpc_id
+  subnetwork               = var.subnet_id
+  networking_mode          = "VPC_NATIVE"
 
-  network    = var.vpc_id
-  subnetwork = var.subnet_id
-
-  # Enable IP aliasing
-  ip_allocation_policy {
-    cluster_secondary_range_name  = "k8s-pods"
-    services_secondary_range_name = "k8s-services"
-  }
-
-  # Enable private cluster
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = var.master_ipv4_cidr_block
-  }
-
-  # Enable workload identity
+  # Enable Workload Identity
   workload_identity_config {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
 
-  # Add cluster autoscaling
-  vertical_pod_autoscaling {
-    enabled = true
+  # Configure network policy
+  network_policy {
+    enabled  = var.network_policy_enabled
+    provider = "CALICO"
+  }
+
+  # Configure private cluster
+  private_cluster_config {
+    enable_private_nodes    = var.private_cluster_enabled
+    enable_private_endpoint = var.private_endpoint_enabled
+    master_ipv4_cidr_block  = "172.16.0.0/28"
+  }
+
+  # Configure IP allocation for pods and services
+  ip_allocation_policy {
+   cluster_secondary_range_name  = "k8s-pods"
+    services_secondary_range_name = "k8s-services"
+  }
+
+  # Configure cluster addon features
+  addons_config {
+    http_load_balancing {
+      disabled = !var.http_load_balancing_enabled
+    }
+    horizontal_pod_autoscaling {
+      disabled = !var.horizontal_pod_autoscaling_enabled
+    }
+    network_policy_config {
+      disabled = !var.network_policy_enabled
+    }
+  }
+
+  # Configure master authorized networks
+  master_authorized_networks_config {
+    dynamic "cidr_blocks" {
+      for_each = var.master_authorized_networks
+      content {
+        cidr_block   = cidr_blocks.value.cidr_block
+        display_name = cidr_blocks.value.display_name
+      }
+    }
+  }
+
+  # Configure logging and monitoring
+  logging_service    = var.logging_service
+  monitoring_service = var.monitoring_service
+
+  release_channel {
+    channel = var.release_channel
   }
 }
 
-# Create the node pools
-resource "google_container_node_pool" "command_layer_nodes" {
-  name       = "command-layer"
-  project    = var.project_id
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  node_count = var.command_layer_node_count
-
-  node_config {
-    preemptible  = false
-    machine_type = var.command_layer_machine_type
-
-    # Google recommends custom service accounts with minimum privileges
-    service_account = google_service_account.k8s_sa.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    # Enable workload identity on node pool
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    labels = {
-      layer = "command"
-    }
-
-    tags = ["gke-nodes", "command-layer"]
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  autoscaling {
-    min_node_count = var.command_layer_min_node_count
-    max_node_count = var.command_layer_max_node_count
-  }
-}
-
-resource "google_container_node_pool" "mdm_layer_nodes" {
-  name       = "mdm-layer"
-  project    = var.project_id
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  node_count = var.mdm_layer_node_count
-
-  node_config {
-    preemptible  = false
-    machine_type = var.mdm_layer_machine_type
-    service_account = google_service_account.k8s_sa.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    labels = {
-      layer = "mdm"
-    }
-
-    tags = ["gke-nodes", "mdm-layer"]
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  autoscaling {
-    min_node_count = var.mdm_layer_min_node_count
-    max_node_count = var.mdm_layer_max_node_count
-  }
-}
-
-resource "google_container_node_pool" "raw_layer_nodes" {
-  name       = "raw-layer"
-  project    = var.project_id
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  node_count = var.raw_layer_node_count
-
-  node_config {
-    preemptible  = false
-    machine_type = var.raw_layer_machine_type
-    service_account = google_service_account.k8s_sa.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    labels = {
-      layer = "raw"
-    }
-
-    tags = ["gke-nodes", "raw-layer"]
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  autoscaling {
-    min_node_count = var.raw_layer_min_node_count
-    max_node_count = var.raw_layer_max_node_count
-  }
-}
-
-resource "google_container_node_pool" "meter_layer_nodes" {
-  name       = "meter-layer"
-  project    = var.project_id
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  node_count = var.meter_layer_node_count
-
-  node_config {
-    preemptible  = false
-    machine_type = var.meter_layer_machine_type
-    service_account = google_service_account.k8s_sa.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    labels = {
-      layer = "meter"
-    }
-
-    tags = ["gke-nodes", "meter-layer"]
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  autoscaling {
-    min_node_count = var.meter_layer_min_node_count
-    max_node_count = var.meter_layer_max_node_count
-  }
-}
-
-resource "google_container_node_pool" "network_layer_nodes" {
-  name       = "network-layer"
-  project    = var.project_id
-  location   = var.region
-  cluster    = google_container_cluster.primary.name
-  node_count = var.network_layer_node_count
-
-  node_config {
-    preemptible  = false
-    machine_type = var.network_layer_machine_type
-    service_account = google_service_account.k8s_sa.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    workload_metadata_config {
-      mode = "GKE_METADATA"
-    }
-
-    labels = {
-      layer = "network"
-    }
-
-    tags = ["gke-nodes", "network-layer"]
-  }
-
-  management {
-    auto_repair  = true
-    auto_upgrade = true
-  }
-
-  autoscaling {
-    min_node_count = var.network_layer_min_node_count
-    max_node_count = var.network_layer_max_node_count
-  }
-}
-
-# Create a service account for GKE nodes
-resource "google_service_account" "k8s_sa" {
-  account_id   = "gke-node-sa"
-  display_name = "GKE Node Service Account"
-  project      = var.project_id
-}
-
-# Grant roles to the service account
-resource "google_project_iam_member" "k8s_sa_roles" {
-  for_each = toset([
-    "roles/logging.logWriter",
-    "roles/monitoring.metricWriter",
-    "roles/monitoring.viewer",
-    "roles/storage.objectViewer",
-  ])
-  
+# Create a node pool
+resource "google_container_node_pool" "primary_nodes" {
+  name       = "${var.cluster_name}-node-pool"
   project = var.project_id
-  role    = each.key
-  member  = "serviceAccount:${google_service_account.k8s_sa.email}"
+  location   = var.location
+  cluster    = google_container_cluster.primary.name
+  node_count = var.initial_node_count
+
+  # Enable autoscaling
+  autoscaling {
+    min_node_count = var.min_node_count
+    max_node_count = var.max_node_count
+  }
+
+  # Configure upgrade strategy
+  management {
+    auto_repair  = "true"
+    auto_upgrade = "true"
+  }
+
+  # Configure node properties
+  node_config {
+    preemptible  = var.preemptible
+    machine_type = var.machine_type
+    disk_size_gb = var.disk_size_gb
+    disk_type    = var.disk_type
+
+    # Define OAuth scopes
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/compute",
+    ]
+
+    # Define node labels
+    labels = var.node_labels
+
+    # Define node taints
+    dynamic "taint" {
+      for_each = var.node_taints
+      content {
+        key    = taint.value.key
+        value  = taint.value.value
+        effect = taint.value.effect
+      }
+    }
+
+    # Configure workload identity on nodes
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
+
+    # Define node metadata
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
+
+    # Define node tags
+    tags = var.node_tags
+  }
 }

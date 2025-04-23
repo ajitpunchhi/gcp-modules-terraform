@@ -1,150 +1,191 @@
 variable "project_id" {
-  description = "GCP Project ID"
-  type        = string
-}
-
-variable "region" {
-  description = "GCP region"
+  description = "The GCP project ID"
   type        = string
 }
 
 variable "vpc_id" {
-  description = "ID of the VPC"
-  type        = string
+  description = "Network id"
+  type = string
+  
 }
 
 variable "subnet_id" {
-  description = "ID of the subnet"
+  description = "subnet id"
+  type = string
+  
+}
+
+variable "region" {
+  description = "The GCP region for regional resources"
   type        = string
+  default     = "terraform.tfvars"
 }
 
-variable "master_ipv4_cidr_block" {
-  description = "CIDR block for Kubernetes master nodes"
+variable "location" {
+  description = "The GCP location (region or zone) for the GKE cluster"
   type        = string
-  default     = "172.16.0.0/28"
+  default     = "asia-southeast1-a"
 }
 
-# Command Layer
-variable "command_layer_node_count" {
-  description = "Number of nodes in the command layer node pool"
-  type        = number
-  default     = 2
-}
-
-variable "command_layer_machine_type" {
-  description = "Machine type for command layer nodes"
+variable "pod_cidr" {
+  description = "CIDR range for pods"
   type        = string
-  default     = "e2-medium"
+  default     = "10.0.6.0/24"
 }
 
-variable "command_layer_min_node_count" {
-  description = "Minimum number of nodes in the command layer node pool"
+variable "svc_cidr" {
+  description = "CIDR range for services"
+  type        = string
+  default     = "10.0.7.0/24"
+}
+
+variable "cluster_name" {
+  description = "Name of the GKE cluster"
+  type        = string
+  default     = "gke-cluster"
+}
+
+variable "private_cluster_enabled" {
+  description = "Whether the cluster has private nodes"
+  type        = bool
+  default     = true
+}
+
+variable "private_endpoint_enabled" {
+  description = "Whether the cluster master endpoint is private-only"
+  type        = bool
+  default     = false
+}
+
+variable "master_authorized_networks" {
+  description = "List of master authorized networks"
+  type = list(object({
+    cidr_block   = string
+    display_name = string
+  }))
+  default = [
+    {
+      cidr_block   = "0.0.0.0/0"
+      display_name = "All"
+    }
+  ]
+}
+
+variable "network_policy_enabled" {
+  description = "Whether to enable network policy"
+  type        = bool
+  default     = true
+}
+
+variable "http_load_balancing_enabled" {
+  description = "Whether to enable HTTP load balancing"
+  type        = bool
+  default     = true
+}
+
+variable "horizontal_pod_autoscaling_enabled" {
+  description = "Whether to enable horizontal pod autoscaling"
+  type        = bool
+  default     = true
+}
+
+variable "logging_service" {
+  description = "The logging service to use"
+  type        = string
+  default     = "logging.googleapis.com/kubernetes"
+}
+
+variable "monitoring_service" {
+  description = "The monitoring service to use"
+  type        = string
+  default     = "monitoring.googleapis.com/kubernetes"
+}
+
+variable "maintenance_start_time" {
+  description = "Start time for maintenance window"
+  type        = string
+  default     = "2025-01-02T01:04:05"
+}
+
+variable "maintenance_end_time" {
+  description = "End time for maintenance window"
+  type        = string
+  default     = "2025-11-02T04:04:05"
+}
+
+variable "maintenance_recurrence" {
+  description = "Recurrence for maintenance window"
+  type        = string
+  default     = "FREQ=WEEKLY;BYDAY=SA,SU"
+}
+
+variable "release_channel" {
+  description = "Release channel for GKE cluster"
+  type        = string
+  default     = "REGULAR"
+}
+
+# Node pool variables
+variable "initial_node_count" {
+  description = "Initial number of nodes per zone"
   type        = number
   default     = 1
 }
 
-variable "command_layer_max_node_count" {
-  description = "Maximum number of nodes in the command layer node pool"
-  type        = number
-  default     = 2
-}
-
-# MDM Layer
-variable "mdm_layer_node_count" {
-  description = "Number of nodes in the MDM layer node pool"
-  type        = number
-  default     = 2
-}
-
-variable "mdm_layer_machine_type" {
-  description = "Machine type for MDM layer nodes"
-  type        = string
-  default     = "e2-medium"
-}
-
-variable "mdm_layer_min_node_count" {
-  description = "Minimum number of nodes in the MDM layer node pool"
+variable "min_node_count" {
+  description = "Minimum number of nodes per zone"
   type        = number
   default     = 1
 }
 
-variable "mdm_layer_max_node_count" {
-  description = "Maximum number of nodes in the MDM layer node pool"
+variable "max_node_count" {
+  description = "Maximum number of nodes per zone"
   type        = number
   default     = 2
 }
 
-# Raw Layer
-variable "raw_layer_node_count" {
-  description = "Number of nodes in the raw layer node pool"
-  type        = number
-  default     = 2
+variable "preemptible" {
+  description = "Whether to use preemptible nodes"
+  type        = bool
+  default     = false
 }
 
-variable "raw_layer_machine_type" {
-  description = "Machine type for raw layer nodes"
+variable "machine_type" {
+  description = "Machine type for nodes"
   type        = string
-  default     = "e2-medium"
+  default     = "e2-standard-2"
 }
 
-variable "raw_layer_min_node_count" {
-  description = "Minimum number of nodes in the raw layer node pool"
+variable "disk_size_gb" {
+  description = "Disk size in GB for nodes"
   type        = number
-  default     = 1
+  default     = 100
 }
 
-variable "raw_layer_max_node_count" {
-  description = "Maximum number of nodes in the raw layer node pool"
-  type        = number
-  default     = 5
-}
-
-# Meter Layer
-variable "meter_layer_node_count" {
-  description = "Number of nodes in the meter layer node pool"
-  type        = number
-  default     = 2
-}
-
-variable "meter_layer_machine_type" {
-  description = "Machine type for meter layer nodes"
+variable "disk_type" {
+  description = "Disk type for nodes"
   type        = string
-  default     = "e2-medium"
+  default     = "pd-standard"
 }
 
-variable "meter_layer_min_node_count" {
-  description = "Minimum number of nodes in the meter layer node pool"
-  type        = number
-  default     = 1
+variable "node_labels" {
+  description = "Labels to apply to nodes"
+  type        = map(string)
+  default     = {}
 }
 
-variable "meter_layer_max_node_count" {
-  description = "Maximum number of nodes in the meter layer node pool"
-  type        = number
-  default     = 5
+variable "node_taints" {
+  description = "Taints to apply to nodes"
+  type = list(object({
+    key    = string
+    value  = string
+    effect = string
+  }))
+  default = []
 }
 
-# Network Layer
-variable "network_layer_node_count" {
-  description = "Number of nodes in the network layer node pool"
-  type        = number
-  default     = 2
-}
-
-variable "network_layer_machine_type" {
-  description = "Machine type for network layer nodes"
-  type        = string
-  default     = "e2-medium"
-}
-
-variable "network_layer_min_node_count" {
-  description = "Minimum number of nodes in the network layer node pool"
-  type        = number
-  default     = 1
-}
-
-variable "network_layer_max_node_count" {
-  description = "Maximum number of nodes in the network layer node pool"
-  type        = number
-  default     = 5
+variable "node_tags" {
+  description = "Network tags to apply to nodes"
+  type        = list(string)
+  default     = []
 }

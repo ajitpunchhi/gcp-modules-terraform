@@ -6,6 +6,78 @@
 # The load balancers are configured with health checks to ensure that traffic is only sent to healthy instances.
 # The network load balancer is designed for low-latency, high-throughput applications, while the application load balancer provides advanced routing capabilities.
 
+# Create instance template
+resource "google_compute_instance_template" "instance_template" {
+  name_prefix  = "mqtt-template-"
+  machine_type = var.machine_type
+  region       = var.region
+  project      = var.project_id
+  tags         = ["web-server", "allow-health-check"]
+
+  disk {
+    source_image = var.source_image
+    auto_delete  = "true"
+    boot         = "true"
+  }
+
+  network_interface {
+    network    = var.vpc_id
+    subnetwork = var.subnet_id
+    access_config {
+      # Ephemeral IP
+    }
+  }
+
+  metadata_startup_script = var.startup_script
+
+  lifecycle {
+    create_before_destroy = "true"
+  }
+}
+
+# Create instance group
+resource "google_compute_instance_group_manager" "instance_group" {
+  name               = "mqtt-instance-group"
+  base_instance_name = "mqtt-instance"
+  project             = var.project_id
+  zone                = var.zone
+  target_size        = var.target_size
+
+  version {
+    instance_template = google_compute_instance_template.instance_template.id
+  }
+
+  named_port {
+    name = "http"
+    port = 80
+  }
+
+  named_port {
+    name = "https"
+    port = 443
+  }
+
+}
+
+# Create health check
+resource "google_compute_health_check" "health_check" {
+  name               = "vm-health-check"
+  project            = var.project_id
+  check_interval_sec = 5
+  timeout_sec        = 5
+  healthy_threshold  = 2
+  unhealthy_threshold = 2
+
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
+}
+
+
+
+
+
 
 # Network Load Balancer
 resource "google_compute_forwarding_rule" "network_lb" {
@@ -30,13 +102,9 @@ resource "google_compute_region_backend_service" "network_lb_backend" {
   session_affinity      = "NONE"
   
   
-  dynamic "backend" {
-    for_each = var.network_lb_instance_groups
-    content {
-      group           = backend.value
-      balancing_mode  = "CONNECTION"
-      max_connections = 1000
-    }
+  backend {
+    group = google_compute_instance_group_manager.instance_group.instance_group
+    balancing_mode = "CONNECTION"
   }
 }
 

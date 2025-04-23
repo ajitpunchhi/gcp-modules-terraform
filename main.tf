@@ -89,7 +89,7 @@ module "vm_instance" {
 
 # MQTT Broker
 # This module deploys an MQTT broker for messaging.
-
+/*
 module "mqtt_broker" {
   source = "./modules/mqtt"
   project_id = var.project_id
@@ -98,6 +98,7 @@ module "mqtt_broker" {
   subnet_id  = module.vpc.private_subnet_03_id
   
 }
+*/
 
 # Load balancers (Network and Application)
 # This module sets up network and application load balancers for traffic management.
@@ -106,9 +107,10 @@ module "load_balancers" {
   source                = "./modules/load_balancers"
   project_id            = var.project_id
   region                = var.region
-  network_lb_subnet_id  = module.vpc.private_subnet_03_id
-  application_lb_subnet_id = module.vpc.private_subnet_03_id
-  depends_on            = [module.mqtt_broker]
+  subnet_id             = module.vpc.private_subnet_03_id
+  network_lb_subnet_id  = module.vpc.private_subnet_02_id
+  application_lb_subnet_id = module.vpc.private_subnet_02_id
+  
 }
 
 

@@ -13,12 +13,12 @@ resource "google_compute_instance" "mqtt_broker" {
   }
 
   network_interface {
-    network    = module.vpc.vpc_id
-    subnetwork = module.vpc.private_subnet_03_id
-    
+    network    = var.vpc_id
+    subnetwork = var.subnet_id
     access_config {
       // Ephemeral public IP
     }
+ 
   }
 
   metadata_startup_script = <<-EOF
@@ -48,9 +48,9 @@ resource "google_compute_instance" "mqtt_broker" {
 
   tags = ["mqtt-broker"]
 
-  metadata = {
+  /*metadata = {
     ssh-keys = "ubuntu:${file(var.ssh_public_key_path)}"
-  }
+  }*/
 }
 
 # Create a service account for the MQTT broker
@@ -60,17 +60,6 @@ resource "google_service_account" "mqtt_sa" {
   project      = var.project_id
 }
 
-# Grant roles to the service account
-resource "google_project_iam_member" "mqtt_sa_roles" {
-  for_each = toset([
-    "roles/logging.logWriter",
-    "roles/monitoring.metricWriter",
-  ])
-  
-  project = var.project_id
-  role    = each.key
-  member  = "serviceAccount:${google_service_account.mqtt_sa.email}"
-}
 
 # Create a persistent disk for MQTT data (if needed)
 resource "google_compute_disk" "mqtt_data_disk" {
@@ -83,8 +72,11 @@ resource "google_compute_disk" "mqtt_data_disk" {
 
 # Attach the persistent disk to the instance
 resource "google_compute_attached_disk" "mqtt_data_disk_attachment" {
+  project = var.project_id
+  zone    = "${var.region}-a"
+  
   disk     = google_compute_disk.mqtt_data_disk.id
-  instance = google_compute_instance.mqtt_broker.id
+  instance = google_compute_instance.mqtt_broker.name
 }
 
 # Create a health check for the MQTT broker

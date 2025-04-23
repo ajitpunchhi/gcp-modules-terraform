@@ -35,7 +35,7 @@ module "security" {
 
 
 # Compute instances for various layers
-
+/*
 module "vm_instance" {
   source = "./modules/compute"
   project = var.project_id
@@ -57,7 +57,16 @@ module "vm_instance" {
     EOF
   }
 }
+  */
+# MQTT Broker
+module "mqtt_broker" {
+  source = "./modules/mqtt"
+  project_id = var.project_id
+  region     = var.region
+  vpc_id     = module.vpc.vpc_id
+  subnet_id  = module.vpc.private_subnet_03_id
   
+}
 
 # Load balancers (Network and Application)
 module "load_balancers" {
@@ -66,18 +75,9 @@ module "load_balancers" {
   region                = var.region
   network_lb_subnet_id  = module.vpc.private_subnet_03_id
   application_lb_subnet_id = module.vpc.private_subnet_03_id
-  depends_on            = [module.vm_instance]
+  depends_on            = [module.mqtt_broker]
 }
 
-/*# MQTT Broker
-module "mqtt_broker" {
-  source = "./modules/mqtt"
-  project_id = var.project_id
-  region = var.region
-  subnet_id = module.vpc.private_subnet_03_id
-
-  
-}
 
 /*
 

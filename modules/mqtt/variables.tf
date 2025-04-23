@@ -30,11 +30,12 @@ variable "data_disk_size" {
   default     = 50
 }
 
-variable "ssh_public_key_path" {
+/*variable "ssh_public_key_path" {
   description = "Path to the SSH public key"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
+  default     = "default.pub"
 }
+*/
 
 variable "mqtt_username" {
   description = "Username for MQTT authentication"

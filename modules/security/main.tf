@@ -5,14 +5,14 @@ resource "google_service_account" "service_account" {
   project      = var.project_id
 }
 
-resource "google_project_iam_binding" "service_account_roles" {
+/*resource "google_project_iam_binding" "service_account_roles" {
   project = var.project_id
   role    = "roles/editor"
   
   members = [
     "serviceAccount:${google_service_account.service_account.email}",
   ]
-}
+}*/
 
 # Cloud Armor Security Policy
 resource "google_compute_security_policy" "cloud_armor" {

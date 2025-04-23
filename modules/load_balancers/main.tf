@@ -20,6 +20,7 @@ resource "google_compute_region_backend_service" "network_lb_backend" {
   health_checks         = [google_compute_region_health_check.network_lb_health_check.id]
   session_affinity      = "NONE"
   
+  
   dynamic "backend" {
     for_each = var.network_lb_instance_groups
     content {
@@ -81,6 +82,7 @@ resource "google_compute_backend_service" "app_lb_backend" {
   load_balancing_scheme = "EXTERNAL"
   timeout_sec           = 30
   health_checks         = [google_compute_health_check.app_lb_health_check.id]
+
   
   dynamic "backend" {
     for_each = var.application_lb_instance_groups

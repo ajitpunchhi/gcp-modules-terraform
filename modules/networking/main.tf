@@ -11,6 +11,7 @@ resource "google_compute_subnetwork" "public_subnet" {
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+ 
 }
 
 # Private subnet
@@ -30,6 +31,13 @@ resource "google_compute_subnetwork" "private_subnet_01" {
     range_name    = "k8s-services"
     ip_cidr_range = var.k8s_services_cidr
   }
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+  private_ip_google_access = true
+  depends_on = [google_compute_network.vpc]
 }
 
 resource "google_compute_subnetwork" "private_subnet_02" {
@@ -38,6 +46,13 @@ resource "google_compute_subnetwork" "private_subnet_02" {
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+  private_ip_google_access = true
+  depends_on = [google_compute_network.vpc]
 }
 
 resource "google_compute_subnetwork" "private_subnet_03" {
@@ -46,6 +61,13 @@ resource "google_compute_subnetwork" "private_subnet_03" {
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+  private_ip_google_access = true
+  depends_on = [google_compute_network.vpc]
 }
 
 resource "google_compute_subnetwork" "private_subnet_04" {
@@ -54,6 +76,13 @@ resource "google_compute_subnetwork" "private_subnet_04" {
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+  private_ip_google_access = true
+  depends_on = [google_compute_network.vpc]
 }
 
 resource "google_compute_subnetwork" "private_subnet_05" {
@@ -62,6 +91,13 @@ resource "google_compute_subnetwork" "private_subnet_05" {
   region        = var.region
   network       = google_compute_network.vpc.id
   project       = var.project_id
+  log_config {
+    aggregation_interval = "INTERVAL_10_MIN"
+    flow_sampling        = 0.5
+    metadata             = "INCLUDE_ALL_METADATA"
+  }
+  private_ip_google_access = true
+  depends_on = [google_compute_network.vpc]
 }
 
 # NAT Router
@@ -70,6 +106,13 @@ resource "google_compute_router" "router" {
   region  = var.region
   network = google_compute_network.vpc.id
   project = var.project_id
+  bgp {
+    asn = 65001
+  }
+  depends_on = [google_compute_network.vpc]
+  lifecycle {
+    ignore_changes = [bgp]
+  }
 }
 
 # NAT Gateway

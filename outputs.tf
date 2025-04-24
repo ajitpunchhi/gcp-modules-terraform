@@ -66,3 +66,19 @@ output "memorystore_endpoint" {
   value       = module.memorystore.redis_endpoint
 }
 */
+
+# Outputs
+output "redis_ha_host" {
+  description = "The IP address of the Redis HA instance"
+  value       = module.redis_ha.host
+}
+
+output "redis_ha_port" {
+  description = "The port of the Redis HA instance"
+  value       = module.redis_ha.port
+}
+
+output "redis_basic_host" {
+  description = "The IP address of the Redis Basic instance"
+  value       = module.redis_basic.host
+}

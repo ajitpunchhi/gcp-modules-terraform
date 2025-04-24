@@ -77,6 +77,49 @@ resource "google_compute_firewall" "allow_mqtt" {
   source_ranges = [var.private_subnet_04_cidr, var.private_subnet_05_cidr]
   target_tags   = ["mqtt-broker"]
 }
+
+# Firewall rules for Cassandra
+resource "google_compute_firewall" "cassandra_internal" {
+  name    = "cassendra-internal"
+  project = var.project_id
+  network = var.vpc_id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["7000", "7001", "7199", "9042", "9160"]
+  }
+
+  source_tags = ["cassendra"]
+  target_tags = ["cassendra"]
+}
+
+resource "google_compute_firewall" "cassandra_ssh" {
+  name    = "cassndra-ssh"
+  project = var.project_id
+  network = var.vpc_id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["cassendra-ssh"]
+}
+
+resource "google_compute_firewall" "cassandra_client" {
+  name    = "cassandra-client"
+  project = var.project_id
+  network = var.vpc_id
+
+  allow {
+    protocol = "tcp"
+    ports    = ["9042"]  # CQL native port
+  }
+
+  source_ranges = ["0.0.0.0/0"]  # You may want to restrict this in production
+  target_tags   = ["cassandra-client"]
+}
 /*
 # Allow RabbitMQ traffic
 resource "google_compute_firewall" "allow_rabbitmq" {

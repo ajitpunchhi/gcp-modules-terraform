@@ -16,3 +16,8 @@ variable "environment" {
   description = "Environment (dev, staging, prod)"
   type        = string
 }
+
+variable "authorized_network" {
+  description = "The full name of the Google Compute Engine network to which the instance is connected"
+  type        = string
+}

@@ -59,11 +59,46 @@ module "security" {
   depends_on              = [module.vpc]
 }
 
+# Load balancers (Network and Application)
+# This module sets up network and application load balancers for traffic management.
+
+
+module "load_balancers" {
+  source                = "./modules/load_balancers"
+  project_id            = var.project_id
+  region                = var.region
+  subnet_id             = module.vpc.private_subnet_03_id
+  network_lb_subnet_id  = module.vpc.private_subnet_02_id
+  application_lb_subnet_id = module.vpc.private_subnet_02_id
+    
+}
+
+#Cassandra cluster on GCP without the load 
+module "cassandra" {
+  source = "./modules/cassandra"
+  region = var.region
+  project_id = var.project_id
+  cluster_name = "cassendra-nod"
+  node_count      = 2
+  machine_type    = "n2-standard-8"
+  boot_disk_size  = 100
+  data_disk_size  = 1000
+  data_disk_type  = "pd-ssd"
+  subnetwork  = module.vpc.private_subnet_05_name
+  cassandra_version = "4.1.1"
+  tags = ["cassandra", "database", "production"]
+  
+  # Optionally, you can add SSH keys for access
+  ssh_keys = "user:ssh-rsa AAAAB3NzaC1yc2EAAA... user@example.com"
+}
+  
+
+
 
 # Compute instances for various layers
 # This module deploys virtual machine instances for different layers of the application.
 
-/*
+
 module "vm_instance" {
   source = "./modules/compute"
   project = var.project_id
@@ -85,7 +120,78 @@ module "vm_instance" {
     EOF
   }
 }
-  */
+
+# Memorystore (Redis)
+# This module configures a Redis instance for in-memory data storage.
+# It is responsible for managing in-memory data caching and storage.
+# The Redis instance is essential for improving application performance and reducing latency.
+
+# Redis Standard Tier Instance
+module "redis_ha" {
+  source = "./modules/memorystore"
+
+  project_id             = var.project_id
+  name                   = "redis-ha-instance"
+  region                 = var.region
+  location_id            = "${var.region}-a"
+  alternative_location_id = "${var.region}-c"
+  memory_size_gb         = 5
+  redis_version          = "REDIS_6_X"
+  tier                   = "STANDARD_HA"
+  connect_mode           = "PRIVATE_SERVICE_ACCESS"
+  authorized_network     = var.authorized_network
+  
+  redis_configs = {
+    "maxmemory-policy" = "allkeys-lru"
+    "notify-keyspace-events" = "KEA"
+  }
+  
+  auth_enabled = true
+  transit_encryption_mode = "SERVER_AUTHENTICATION"
+  
+  maintenance_policy = {
+    day = "SATURDAY"
+    start_time = {
+      hours = 23
+      minutes = 0
+      seconds = 0
+      nanos = 0
+    }
+  }
+  
+  redis_labels = {
+    environment = "production"
+    application = "backend-cache"
+  }
+  
+}
+
+# Redis Basic Tier Instance
+module "redis_basic" {
+  source = "./modules/memorystore"
+
+  project_id         = var.project_id
+  name               = "redis-basic-instance"
+  region             = var.region
+  location_id        = "${var.region}-b"
+  memory_size_gb     = 2
+  redis_version      = "REDIS_6_X"
+  tier               = "BASIC"
+  authorized_network = var.authorized_network
+  
+  redis_configs = {
+    "maxmemory-policy" = "volatile-lru"
+  }
+  
+  redis_labels = {
+    environment = "development"
+    application = "testing-cache"
+  }
+  
+
+}
+
+
 
 # MQTT Broker
 # This module deploys an MQTT broker for messaging.
@@ -99,21 +205,6 @@ module "mqtt_broker" {
   
 }
 */
-
-# Load balancers (Network and Application)
-# This module sets up network and application load balancers for traffic management.
-
-module "load_balancers" {
-  source                = "./modules/load_balancers"
-  project_id            = var.project_id
-  region                = var.region
-  subnet_id             = module.vpc.private_subnet_03_id
-  network_lb_subnet_id  = module.vpc.private_subnet_02_id
-  application_lb_subnet_id = module.vpc.private_subnet_02_id
-  
-  
-}
-
 
 /*
 
@@ -144,28 +235,4 @@ module "bigtable" {
   depends_on = [module.vpc]
 }
 
-# Memorystore (Redis)
-# This module configures a Redis instance for in-memory data storage.
-# It is responsible for managing in-memory data caching and storage.
-# The Redis instance is essential for improving application performance and reducing latency.
-
-module "memorystore" {
-  source       = "./modules/memorystore"
-  project_id   = var.project_id
-  region       = var.region
-  vpc_id       = module.vpc.vpc_id
-  private_subnet_id = module.vpc.private_subnet_id
-  depends_on   = [module.vpc]
-}
-
-# Kubernetes Services
-
-module "kubernetes" {
-  source       = "./modules/kubernetes"
-  project_id   = var.project_id
-  region       = var.region
-  vpc_id       = module.vpc.vpc_id
-  subnet_id    = module.vpc.private_subnet_id
-  depends_on   = [module.vpc]
-}
 */

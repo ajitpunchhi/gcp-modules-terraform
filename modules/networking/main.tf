@@ -122,20 +122,37 @@ resource "google_compute_router" "router" {
   }
 }
 
-# NAT Gateway
-resource "google_compute_router_nat" "nat_gateway" {
-  name                               = "nat-gateway"
-   router                             = google_compute_router.router.name
-  region                             = var.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+resource "google_compute_router_nat" "nat" {
+  name                               = "${var.name}-config"
   project                            = var.project_id
+  router                             = google_compute_router.router.name
+  region                             = var.region
+  nat_ip_allocate_option             = var.nat_ip_allocate_option
+  source_subnetwork_ip_ranges_to_nat = var.source_subnetwork_ip_ranges_to_nat
+  nat_ips                            = var.nat_ips
+  min_ports_per_vm                   = var.min_ports_per_vm
+  
+  udp_idle_timeout_sec             = var.udp_idle_timeout_sec
+  icmp_idle_timeout_sec            = var.icmp_idle_timeout_sec
+  tcp_established_idle_timeout_sec = var.tcp_established_idle_timeout_sec
+  tcp_transitory_idle_timeout_sec  = var.tcp_transitory_idle_timeout_sec
   
   log_config {
-    enable = true
-    filter = "ERRORS_ONLY"
+    enable = var.log_config_enable
+    filter = var.log_config_filter
+  }
+  
+  dynamic "subnetwork" {
+    for_each = var.source_subnetwork_ip_ranges_to_nat == "ALL_SUBNETWORKS_ALL_IP_RANGES"? var.subnetworks : []
+    content {
+      name                     = subnetwork.value.name
+      source_ip_ranges_to_nat  = subnetwork.value.source_ip_ranges_to_nat
+      secondary_ip_range_names = subnetwork.value.secondary_ip_range_names
+    }
   }
 }
+
 
 /*# VPN
 resource "google_compute_vpn_gateway" "vpn_gateway" {

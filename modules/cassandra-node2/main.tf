@@ -23,6 +23,7 @@ resource "google_compute_instance" "cassandra" {
     network    = var.network
     subnetwork = var.subnetwork
     
+    
   }
 
 

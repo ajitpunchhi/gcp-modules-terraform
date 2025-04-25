@@ -57,3 +57,81 @@ variable "mtu" {
   default     = 1460
   
 }
+
+
+# NAT Gateway
+variable "name" {
+  description = "Name prefix for the NAT resources"
+  type        = string
+  default     = "nat-gateway"
+}
+
+variable "nat_ip_allocate_option" {
+  description = "How external IPs should be allocated for the NAT. Options are AUTO_ONLY or MANUAL_ONLY."
+  type        = string
+  default     = "AUTO_ONLY"
+}
+
+variable "source_subnetwork_ip_ranges_to_nat" {
+  description = "How NAT should be configured per Subnetwork. Options are ALL_SUBNETWORKS_ALL_IP_RANGES, ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, or LIST_OF_SUBNETWORKS"
+  type        = string
+  default     = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+
+variable "nat_ips" {
+  description = "List of self_links of external IPs. Required if NAT_IP_ALLOCATE_OPTION is MANUAL_ONLY"
+  type        = list(string)
+  default     = []
+}
+
+variable "min_ports_per_vm" {
+  description = "Minimum number of ports allocated to a VM from this NAT"
+  type        = number
+  default     = 64
+}
+
+variable "udp_idle_timeout_sec" {
+  description = "Timeout (in seconds) for UDP connections"
+  type        = number
+  default     = 30
+}
+
+variable "icmp_idle_timeout_sec" {
+  description = "Timeout (in seconds) for ICMP connections"
+  type        = number
+  default     = 30
+}
+
+variable "tcp_established_idle_timeout_sec" {
+  description = "Timeout (in seconds) for TCP established connections"
+  type        = number
+  default     = 1200
+}
+
+variable "tcp_transitory_idle_timeout_sec" {
+  description = "Timeout (in seconds) for TCP transitory connections"
+  type        = number
+  default     = 30
+}
+
+variable "log_config_enable" {
+  description = "Indicates whether to enable logging"
+  type        = bool
+  default     = false
+}
+
+variable "log_config_filter" {
+  description = "Specifies the desired filtering of logs. Options are ERRORS_ONLY, TRANSLATIONS_ONLY, or ALL"
+  type        = string
+  default     = "ALL"
+}
+
+variable "subnetworks" {
+  description = "List of subnetworks to NAT (used when source_subnetwork_ip_ranges_to_nat = LIST_OF_SUBNETWORKS)"
+  type = list(object({
+    name                     = string
+    source_ip_ranges_to_nat  = list(string)
+    secondary_ip_range_names = list(string)
+  }))
+  default = []
+}

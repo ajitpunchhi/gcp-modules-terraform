@@ -36,7 +36,7 @@ module "firewall" {
 
 # Kubernetes Services
 # This module deploys a Kubernetes cluster for container orchestration.
-
+/*
 module "kubernetes" {
   source       = "./modules/kubernetes"
   project_id   = var.project_id
@@ -44,7 +44,7 @@ module "kubernetes" {
     vpc_id       = module.vpc.vpc_id
   subnet_id    = module.vpc.private_subnet_04_id
   depends_on   = [module.vpc]
-}
+}*/
 
 
 # Security
@@ -62,7 +62,7 @@ module "security" {
 # Load balancers (Network and Application)
 # This module sets up network and application load balancers for traffic management.
 
-
+/*
 module "load_balancers" {
   source                = "./modules/load_balancers"
   project_id            = var.project_id
@@ -70,28 +70,8 @@ module "load_balancers" {
   subnet_id             = module.vpc.private_subnet_03_id
   network_lb_subnet_id  = module.vpc.private_subnet_02_id
   application_lb_subnet_id = module.vpc.private_subnet_02_id
-    
-}
-
-#Cassandra cluster on GCP without the load 
-module "cassandra" {
-  source = "./modules/cassandra"
-  region = var.region
-  project_id = var.project_id
-  cluster_name = "cassendra-nod"
-  node_count      = 2
-  machine_type    = "n2-standard-8"
-  boot_disk_size  = 100
-  data_disk_size  = 1000
-  data_disk_type  = "pd-ssd"
-  subnetwork  = module.vpc.private_subnet_05_name
-  cassandra_version = "4.1.1"
-  tags = ["cassandra", "database", "production"]
-  
-  # Optionally, you can add SSH keys for access
-  ssh_keys = "user:ssh-rsa AAAAB3NzaC1yc2EAAA... user@example.com"
-}
-  
+  depends_on           = [module.vpc]
+}*/
 
 
 
@@ -121,6 +101,66 @@ module "vm_instance" {
   }
 }
 
+# Create the first Cassandra node (will be the seed node)
+module "cassandra_seed" {
+  source = "./modules/cassandra"
+  
+  project_id     = var.project_id
+  region         = var.region
+  instance_name  = "cassandra-seed"
+  machine_type   = "n2-standard-4"
+  network        = module.vpc.vpc_id
+  subnetwork     = module.vpc.private_subnet_05_id
+  disk_size_gb   = 20
+  cluster_name   = "my-cassandra-cluster"
+  datacenter_name = "dc1"
+  
+  # First node is the seed, so we don't specify any seeds for it
+  cassandra_seeds = []
+}
+
+# Create additional Cassandra nodes using the seed node as the seed
+module "cassandra_node_1" {
+  source = "./modules/cassandra-node1"
+  
+  project_id     = var.project_id
+  region         = var.region
+  instance_name  = "cassandra-node-1"
+  machine_type   = "n2-standard-4"
+  network        = module.vpc.vpc_id
+  subnetwork     = module.vpc.private_subnet_05_id
+  disk_size_gb   = 20
+  cluster_name   = "my-cassandra-cluster"
+  datacenter_name = "dc1"
+  
+  # Use the seed node's internal IP
+#cassandra_seeds = [google_compute_instance.cassandra_seed.network_interface[0].network_ip]
+  
+  # Make sure seed node is created first
+  depends_on = [module.vpc.private_subnet_05_id]
+}
+
+module "cassandra_node_2" {
+  source = "./modules/cassandra-node2"
+  
+  project_id     = var.project_id
+  region         = var.region
+  instance_name  = "cassandra-node-2"
+  machine_type   = "n2-standard-4"
+  network        = module.vpc.vpc_id
+  subnetwork     = module.vpc.private_subnet_05_id
+  disk_size_gb   = 20
+  cluster_name   = "my-cassandra-cluster"
+  datacenter_name = "dc1"
+  
+  # Use the seed node's internal IP
+  #cassandra_seeds = [google_compute_instance.cassandra_seed.network_interface[0].network_ip]
+  
+  # Make sure seed node is created first
+  depends_on = [module.cassandra_seed]
+}
+
+/*
 # Memorystore (Redis)
 # This module configures a Redis instance for in-memory data storage.
 # It is responsible for managing in-memory data caching and storage.
@@ -190,7 +230,7 @@ module "redis_basic" {
   
 
 }
-
+*/
 
 
 # MQTT Broker
@@ -204,35 +244,4 @@ module "mqtt_broker" {
   subnet_id  = module.vpc.private_subnet_03_id
   
 }
-*/
-
-/*
-
-# RabbitMQ 
-# This module deploys a RabbitMQ instance for message queuing.
-# It is responsible for managing message queues and facilitating communication between different components of the application.
-# The RabbitMQ instance is essential for enabling reliable message delivery and processing.
-
-module "rabbitmq" {
-  source     = "./modules/rabbitmq"
-  project_id = var.project_id
-  region     = var.region
-  subnet_id  = module.vpc.private_subnet_id
-  depends_on = [module.vpc]
-}
-
-/*
-
-# BigTable Cluster
-# This module sets up a BigTable cluster for NoSQL database needs.
-# It is responsible for managing large-scale data storage and retrieval.
-# The BigTable cluster is essential for handling big data workloads and providing low-latency access to data.
-
-module "bigtable" {
-  source     = "./modules/bigtable"
-  project_id = var.project_id
-  region     = var.region
-  depends_on = [module.vpc]
-}
-
 */

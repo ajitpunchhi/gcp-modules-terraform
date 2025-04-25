@@ -23,9 +23,7 @@ resource "google_compute_instance_template" "instance_template" {
   network_interface {
     network    = var.vpc_id
     subnetwork = var.subnet_id
-    access_config {
-      # Ephemeral IP
-    }
+    
   }
 
   metadata_startup_script = var.startup_script

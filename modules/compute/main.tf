@@ -25,7 +25,15 @@ resource "google_compute_instance" "vm_instance" {
     # No access_config block means no external IP
   }
 
-  metadata = var.metadata
+  metadata_startup_script = <<-EOF
+    #!/bin/bash
+    apt-get update
+    apt-get install -y curl
+    # Test outbound connectivity via NAT
+    curl -s http://ifconfig.me > /tmp/external_ip.txt
+  EOF
+
+
 
   dynamic "service_account" {
     for_each = var.service_account.email != "" ? [1] : []

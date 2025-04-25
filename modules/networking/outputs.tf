@@ -73,7 +73,3 @@ output "private_subnet_05_name" {
   value       = google_compute_subnetwork.private_subnet_ec2.id
 }
 */
-output "nat_gateway_id" {
-  description = "ID of the NAT gateway"
-  value       = google_compute_router_nat.nat_gateway.id
-}

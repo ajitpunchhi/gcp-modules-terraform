@@ -120,6 +120,24 @@ resource "google_compute_firewall" "cassandra_client" {
   source_ranges = ["0.0.0.0/0"]  # You may want to restrict this in production
   target_tags   = ["cassandra-client"]
 }
+
+resource "google_compute_firewall" "allow_iap_ssh" {
+  name    = "allow-iap-ssh"
+  network = var.vpc_id
+  project = var.project_id
+  # Allow SSH access to VMs via IAP
+  # This rule is for instances that are tagged with "allow-ssh"
+  
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  
+  # IAP's IP range
+  source_ranges = ["35.235.240.0/20"]
+  destination_ranges = ["10.0.2.0/24", "10.0.3.0/24","10.0.4.0/24","10.0.5.0/24"]
+}
+
 /*
 # Allow RabbitMQ traffic
 resource "google_compute_firewall" "allow_rabbitmq" {

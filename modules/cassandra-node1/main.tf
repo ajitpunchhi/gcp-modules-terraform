@@ -23,6 +23,10 @@ resource "google_compute_instance" "cassandra" {
     network    = var.network
     subnetwork = var.subnetwork
     
+    # If you want a public IP
+    access_config {
+      // Ephemeral public IP
+    }
   }
 
 

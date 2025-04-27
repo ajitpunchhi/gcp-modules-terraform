@@ -8,6 +8,12 @@ variable "vpc_id" {
   type = string
   
 }
+variable "nodescount" {
+  description = "Initial number of nodes per zone"
+  type        = number
+  default     = "2"
+  
+}
 
 variable "subnet_id" {
   description = "subnet id"
@@ -65,7 +71,7 @@ variable "master_authorized_networks" {
   }))
   default = [
     {
-      cidr_block   = "0.0.0.0/0"
+      cidr_block   = "10.0.5.0/24"
       display_name = "All"
     }
   ]
@@ -188,4 +194,67 @@ variable "node_tags" {
   description = "Network tags to apply to nodes"
   type        = list(string)
   default     = []
+}
+
+variable "cluster_autoscaling" {
+  description = "Enable cluster-level autoscaling"
+  type = object({
+    enabled             = bool
+    autoscaling_profile = string  # balanced or optimize-utilization
+    min_cpu_cores       = number
+    max_cpu_cores       = number
+    min_memory_gb       = number
+    max_memory_gb       = number
+  })
+  default = {
+    enabled             = false
+    autoscaling_profile = "balanced"
+    min_cpu_cores       = 0
+    max_cpu_cores       = 0
+    min_memory_gb       = 0
+    max_memory_gb       = 0
+  }
+}
+variable "authorized_networks" {
+  description = "List of CIDRs authorized to access the master"
+  type = list(object({
+    cidr_block   = string
+    display_name = string
+  }))
+  default = [
+    {
+      cidr_block   = "10.0.5.0/24"
+      display_name = "All"
+    }
+  ]
+}
+
+variable "enable_network_policy" {
+  description = "Enable Network Policy"
+  type        = bool
+  default     = true
+}
+
+variable "enable_vertical_pod_autoscaling" {
+  description = "Enable Vertical Pod Autoscaling"
+  type        = bool
+  default     = true
+}
+
+variable "enable_horizontal_pod_autoscaling" {
+  description = "Enable Horizontal Pod Autoscaling"
+  type        = bool
+  default     = true
+}
+
+variable "enable_http_load_balancing" {
+  description = "Enable HTTP Load Balancing"
+  type        = bool
+  default     = true
+}
+
+variable "enable_dns_cache" {
+  description = "Enable NodeLocal DNSCache"
+  type        = bool
+  default     = true
 }

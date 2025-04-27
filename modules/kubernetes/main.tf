@@ -1,12 +1,13 @@
 resource "google_container_cluster" "primary" {
   name                     = var.cluster_name
-  project = var.project_id
+  project                  = var.project_id
   location                 = var.location
   remove_default_node_pool = "true"
-  initial_node_count       = 1
+  initial_node_count       = var.nodescount
   network                  = var.vpc_id
   subnetwork               = var.subnet_id
   networking_mode          = "VPC_NATIVE"
+
 
   # Enable Workload Identity
   workload_identity_config {
@@ -24,12 +25,15 @@ resource "google_container_cluster" "primary" {
     enable_private_nodes    = var.private_cluster_enabled
     enable_private_endpoint = var.private_endpoint_enabled
     master_ipv4_cidr_block  = "172.16.0.0/28"
+    master_global_access_config {
+      enabled = "true"
+    }
   }
 
   # Configure IP allocation for pods and services
   ip_allocation_policy {
    cluster_secondary_range_name  = "k8s-pods"
-    services_secondary_range_name = "k8s-services"
+   services_secondary_range_name = "k8s-services"
   }
 
   # Configure cluster addon features

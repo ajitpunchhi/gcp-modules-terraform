@@ -15,7 +15,7 @@
 # - Kubernetes: Deploys a Kubernetes cluster for container orchestration.
 # - Cloud Armor: Configures security policies for the application.
 
-/*
+
 # Enable required APIs
 module "enable_apis" {
   source     = "./modules/gcp-api's"
@@ -43,7 +43,7 @@ module "enable_apis" {
   disable_dependent_services  = true
 }
 
-*/
+
 # VPC Network 
 # This module creates a Virtual Private Cloud (VPC) network with subnets.
 # It is responsible for creating the network infrastructure needed to host the application.
@@ -149,7 +149,7 @@ module "vm_instance" {
   }
 }
 
-/*
+
 
 # Create the first Cassandra node (will be the seed node)
 module "cassandra_seed" {
@@ -209,7 +209,7 @@ module "cassandra_node_2" {
   # Make sure seed node is created first
   depends_on = [module.cassandra_seed]
 }
-*/
+
 
 # Memorystore (Redis)
 # This module configures a Redis instance for in-memory data storage.
@@ -237,10 +237,10 @@ module "memorystore" {
 
 
 
-/*
+
 # MQTT Broker
 # This module deploys an MQTT broker for messaging.
-/*
+
 module "mqtt_broker" {
   source = "./modules/mqtt"
   project_id = var.project_id
@@ -249,4 +249,3 @@ module "mqtt_broker" {
   subnet_id  = module.vpc.private_subnet_03_id
   
 }
-*/

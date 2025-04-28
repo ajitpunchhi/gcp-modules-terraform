@@ -7,6 +7,7 @@ resource "google_container_cluster" "primary" {
   network                  = var.vpc_id
   subnetwork               = var.subnet_id
   networking_mode          = "VPC_NATIVE"
+  deletion_protection       = "false"
 
 
   # Enable Workload Identity
@@ -76,6 +77,7 @@ resource "google_container_node_pool" "primary_nodes" {
   location   = var.location
   cluster    = google_container_cluster.primary.name
   node_count = var.initial_node_count
+
 
   # Enable autoscaling
   autoscaling {

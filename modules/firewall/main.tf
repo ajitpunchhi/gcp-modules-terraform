@@ -138,6 +138,28 @@ resource "google_compute_firewall" "allow_iap_ssh" {
   destination_ranges = ["10.0.2.0/24", "10.0.3.0/24","10.0.4.0/24","10.0.5.0/24"]
 }
 
+resource "google_compute_firewall" "redis_fw" {
+  name          = "redis-firewall-rule"
+  network       = var.vpc_id
+  project       = var.project_id
+  # Allow Redis traffic
+  # This rule is for instances that are tagged with "redis"
+  # and are in the private subnet
+  # This rule allows traffic on port 6379 (Redis default port)
+  direction     = "INGRESS"
+  priority      = 1000
+  target_tags   = ["redis"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["6379"]
+  }
+
+  source_ranges = "10.0.0./16"
+
+  description = "Allow Redis traffic on port 6379 from allowed sources"
+}
+
 /*
 # Allow RabbitMQ traffic
 resource "google_compute_firewall" "allow_rabbitmq" {

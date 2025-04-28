@@ -15,6 +15,7 @@
 # - Kubernetes: Deploys a Kubernetes cluster for container orchestration.
 # - Cloud Armor: Configures security policies for the application.
 
+/*
 # Enable required APIs
 module "enable_apis" {
   source     = "./modules/gcp-api's"
@@ -42,7 +43,7 @@ module "enable_apis" {
   disable_dependent_services  = true
 }
 
-
+*/
 # VPC Network 
 # This module creates a Virtual Private Cloud (VPC) network with subnets.
 # It is responsible for creating the network infrastructure needed to host the application.
@@ -208,7 +209,7 @@ module "cassandra_node_2" {
   # Make sure seed node is created first
   depends_on = [module.cassandra_seed]
 }
-
+*/
 
 # Memorystore (Redis)
 # This module configures a Redis instance for in-memory data storage.
@@ -216,71 +217,27 @@ module "cassandra_node_2" {
 # The Redis instance is essential for improving application performance and reducing latency.
 
 # Redis Standard Tier Instance
-module "redis_ha" {
+module "memorystore" {
   source = "./modules/memorystore"
-
-  project_id             = var.project_id
-  name                   = "redis-ha-instance"
-  region                 = var.region
-  location_id            = "${var.region}-a"
-  alternative_location_id = "${var.region}-c"
-  memory_size_gb         = 5
-  redis_version          = "REDIS_6_X"
-  tier                   = "STANDARD_HA"
-  connect_mode           = "PRIVATE_SERVICE_ACCESS"
-  authorized_network     = var.authorized_network
-  
-  redis_configs = {
-    "maxmemory-policy" = "allkeys-lru"
-    "notify-keyspace-events" = "KEA"
-  }
-  
-  auth_enabled = true
-  transit_encryption_mode = "SERVER_AUTHENTICATION"
-  
-  maintenance_policy = {
-    day = "SATURDAY"
-    start_time = {
-      hours = 23
-      minutes = 0
-      seconds = 0
-      nanos = 0
-    }
-  }
-  
-  redis_labels = {
-    environment = "production"
-    application = "backend-cache"
-  }
-  
-}
-
-# Redis Basic Tier Instance
-module "redis_basic" {
-  source = "./modules/memorystore"
-
-  project_id         = var.project_id
-  name               = "redis-basic-instance"
   region             = var.region
-  location_id        = "${var.region}-b"
-  memory_size_gb     = 2
-  redis_version      = "REDIS_6_X"
-  tier               = "BASIC"
-  authorized_network = var.authorized_network
-  
-  redis_configs = {
-    "maxmemory-policy" = "volatile-lru"
-  }
-  
-  redis_labels = {
-    environment = "development"
-    application = "testing-cache"
-  }
-  
+  project_id         = var.project_id
 
+  name               = "my-redis-instance"
+  tier               = "STANDARD_HA"
+  memory_size_gb     = 4
+  authorized_network = "modele.vpc.vpc_id"
+  transit_encryption_mode = "SERVER_AUTHENTICATION"
+  maintenance_day    = "MONDAY"
+  redis_version      = "REDIS_6_X"
+  labels = {
+    environment = "dev"
+    app         = "my-app"
+  }
 }
 
 
+
+/*
 # MQTT Broker
 # This module deploys an MQTT broker for messaging.
 /*

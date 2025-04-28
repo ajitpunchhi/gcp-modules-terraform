@@ -1,120 +1,68 @@
-# modules/gcp-memorystore/main.tf
-
-# Variables for the module
-variable "project_id" {
-  description = "The ID of the project in which the resource belongs"
-  type        = string
-}
-
 variable "name" {
-  description = "The ID of the instance or a fully qualified identifier for the instance"
+  description = "Name of the Redis instance"
   type        = string
 }
 
-variable "location_id" {
-  description = "The zone where the instance will be provisioned"
+variable "region" {
+  description = "Region where Memorystore will be deployed"
   type        = string
 }
-
-variable "alternative_location_id" {
-  description = "Only applicable to STANDARD_HA tier. The zone where the standby instance will be provisioned"
+variable "project_id" {
+  description = "Project ID where the Redis instance will be created"
   type        = string
-  default     = null
+  default     = "default"  
+}
+
+variable "tier" {
+  description = "Service tier of the instance. Either BASIC or STANDARD_HA."
+  type        = string
+  default     = "STANDARD_HA"
 }
 
 variable "memory_size_gb" {
-  description = "Redis memory size in GiB"
+  description = "Redis memory size in GB"
   type        = number
-  default     = 1
+}
+
+variable "authorized_network" {
+  description = "VPC network to which the instance is connected (full self link or ID)"
+  type        = string
+  default     = "projects/your-gcp-project-id/global/networks/your-vpc-network"
 }
 
 variable "redis_version" {
-  description = "The version of Redis software"
+  description = "Version of Redis software"
   type        = string
   default     = "REDIS_6_X"
 }
 
-variable "tier" {
-  description = "The service tier of the instance"
-  type        = string
-  default     = "BASIC"
-  validation {
-    condition     = contains(["BASIC", "STANDARD_HA"], var.tier)
-    error_message = "Allowed values for tier are \"BASIC\" or \"STANDARD_HA\"."
-  }
-}
-
-variable "region" {
-  description = "The GCP region in which the redis instance will be created"
-  type        = string
-}
-
-variable "authorized_network" {
-  description = "The full name of the Google Compute Engine network to which the instance is connected"
-  type        = string
-  default = "10.0.4.0/24"
-}
-
-variable "connect_mode" {
-  description = "The connect mode of the Redis instance"
-  type        = string
-  default     = "DIRECT_PEERING"
-  validation {
-    condition     = contains(["DIRECT_PEERING", "PRIVATE_SERVICE_ACCESS"], var.connect_mode)
-    error_message = "Allowed values for connect_mode are \"DIRECT_PEERING\" or \"PRIVATE_SERVICE_ACCESS\"."
-  }
-}
-
-variable "reserved_ip_range" {
-  description = "The CIDR range of internal addresses that are reserved for this instance"
-  type        = string
-  default     = null
-}
-
-variable "redis_configs" {
-  description = "Redis configuration parameters, according to http://redis.io/topics/config"
-  type        = map(string)
-  default     = {}
-}
-
-variable "auth_enabled" {
-  description = "Indicates whether OSS Redis AUTH is enabled for the instance"
-  type        = bool
-  default     = false
-}
-
 variable "transit_encryption_mode" {
-  description = "The TLS mode of the Redis instance"
+  description = "The TLS mode, either DISABLED or SERVER_AUTHENTICATION"
   type        = string
   default     = "DISABLED"
-  validation {
-    condition     = contains(["DISABLED", "SERVER_AUTHENTICATION"], var.transit_encryption_mode)
-    error_message = "Allowed values for transit_encryption_mode are \"DISABLED\" or \"SERVER_AUTHENTICATION\"."
-  }
 }
 
-variable "maintenance_policy" {
-  description = "The maintenance policy for the instance"
-  type = object({
-    day        = string
-    start_time = object({
-      hours   = number
-      minutes = number
-      seconds = number
-      nanos   = number
-    })
-  })
-  default = null
-}
-
-variable "redis_labels" {
-  description = "The resource labels to represent user-provided metadata"
+variable "labels" {
+  description = "Resource labels"
   type        = map(string)
-  default     = {}
+  default     = {default = "dev"}
 }
 
-variable "customer_managed_key" {
-  description = "The customer-managed encryption key to be used for the instance"
+variable "maintenance_day" {
+  description = "Day of the week for maintenance (e.g., MONDAY, TUESDAY)"
   type        = string
-  default     = null
+  default     = "MONDAY"
 }
+
+variable "maintenance_start_hour" {
+  description = "Hour when maintenance begins (0-23)"
+  type        = number
+  default     = 1
+}
+
+variable "maintenance_start_min" {
+  description = "Minute when maintenance begins (0-59)"
+  type        = number
+  default     = 0
+}
+

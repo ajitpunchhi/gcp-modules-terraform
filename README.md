@@ -14,12 +14,6 @@
 
 ---
 
-## 🏗️ Architecture Diagram
-
-<p align="center">
-  <img src="https://mermaid.ink/img/pako:eNqNVE1v2zAM_SuETi2QBTl00KHIPiCbsW7YoeihyEGxmVhYbHmUnGwI8t9H2U6aumm7i2U-vkc-UrL2SjvFJJOJ4-JBeX7rDHwePAyeXnvZhLffbKdR2RVHvLvgIbXjQVvVJdM5alTgPbHuwXrcO04ptcGXAWTneBh7wAZjm_tLPDpBu5A8fIRrTz32dQvP9Yee-hwbVMgbP5k8t1g8a8lA9hh-m7ZxAW3QtOtQG9chfIHFCnVSzA3FhS50j4BDRdpgcZg48BUXWrnnqJwj3Tq1VWdLZUqphC3QKRyj815jNzXxVQzdNx8Wau_hkevkFkrNR1hsoR3R4LTBLe2uwYgaK9_tqVGp3Nk5KnS2rJXHFSpTQP4vszVoK2c8YFfKRQYn6bS7mMO4aQxfn34VF_Pl9yjlXGbZfBrNprN5cT2ZZKN5PplNpvNJ8T9AV9l0LqfRbJqVxXUxjYrr0ZEbj8tpFE9SV8aRJovFLXyGSncOYqlE46hP5QwfsdNbp2RHb3cWvNPb8VzqjXpU1kMrlDmDZmJp1M7YE8kKW9GDUrp-9JO-xIFpDLWfYQ6n28YbWL-iBMGYCKMtlkC7w1T6P5aYeC1Bxf2eBi18U04Gh88Qx9UbfXf2fG1Qb-CxUO7tCleCnOEKG9cK9xdRqXiZK29YMDYXIbDPRchXDGGJ35uxq-CXTVlyvgWdVrxjZwKn2K82UVA9ZtKCQcvO82yMWImtVJ1kJrIsmYw3QTKZhuA3Q-iO4UnUUn-XG-Ld-Qc27QgJ" alt="GCP Infrastructure Architecture" width="800">
-</p>
-
 ## 📋 Overview
 
 This repository contains Terraform modules for deploying a comprehensive, production-ready infrastructure on Google Cloud Platform (GCP). The infrastructure is designed with security, scalability, and maintainability in mind, following best practices for cloud architecture.
